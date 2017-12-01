@@ -20,14 +20,15 @@ Copy the files from this repo to the appropriate directories:
 Edit runmyrobot/letsrobot.sample.conf:
 
 * Enter your owner, robot_id, camera_id from LetsRobot.tv
-* change [robot] type=none to type=cozmo
-* change [tts] type=none to type=cozmo_tts
+* change [robot] `type=none` to `type=cozmo`
+* change [tts] `type=none` to `type=cozmo_tts`
 * Save file as letsrobot.conf
 
 ## Starting Cozmo:
 
 * Using the Cozmo app enter SDK mode and connect your mobile device to the host machine.
 * Execute the LetsRobot controller using `python3 controller.py`
+* For audio streaming execute `python send_video.py YOURROBOTID 0 --no-camera &`
 
 ## Note for audio streaming on MacOS:
 
