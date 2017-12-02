@@ -73,6 +73,8 @@ def setup(robot_config):
     global forward_speed
     global turn_speed
     global coz
+    global volume
+    
     coz = tts.tts_module.getCozmo()
     mod_utils.task(30, check_battery, coz)
 
