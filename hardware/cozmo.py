@@ -31,13 +31,41 @@ def play_anim(command, args):
     except:
         pass
 
+def set_forward_speed(command, args):
+    global forward_speed
+    if extended_command.is_authed(args['name']) == 2: # Owner
+        if len(command) > 1:
+            try:
+                forward_speed=int(command[1])
+                print("forward_speed set to : %d" % int(command[1]))
+            except ValueError:
+                pass
+
+def set_turn_speed(command, args):
+    global turn_speed
+    if extended_command.is_authed(args['name']) == 2: # Owner
+        if len(command) > 1:
+            try:
+                turn_speed=int(command[1])
+                print("turn_speed set to : %d" % int(command[1]))
+            except ValueError:
+                pass
+
 def setup(robot_config):
+    global forward_speed
+    global turn_speed
     global coz
     coz = tts.tts_module.getCozmo()
     mod_utils.task(30, check_battery, coz)
 
+    if robot_config.has_section('cozmo'):
+        forward_speed = robot_config.getint('cozmo', 'forward_speed');
+        turn_speed = robot_config.getint('cozmo', 'turn_speed');
+
     if robot_config.getboolean('tts', 'ext_chat'): #ext_chat enabled, add motor commands
         extended_command.add_command('.anim', play_anim)
+        extended_command.add_command('.forward_speed', set_forward_speed)
+        extended_command.add_command('.turn_speed', set_turn_speed)
 
 def light_cubes(robot: cozmo.robot.Robot):
     cube1 = robot.world.get_light_cube(LightCube1Id)  # looks like a paperclip
