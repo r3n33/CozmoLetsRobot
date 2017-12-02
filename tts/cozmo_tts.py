@@ -1,8 +1,7 @@
 import time
 import cozmo
-#import _thread as thread
-import threading
-from threading import Thread
+import _thread as thread
+import sys
 
 coz = None
 video_port = ""
@@ -20,15 +19,17 @@ def setup(robot_config):
     cozmo.robot.Robot.drive_off_charger_on_connect = False
     
     try:
-        thread = Thread(target = cozmo.connect, args = (run, )).start()
-        thread.setDaemon(True)
+        thread.start_new_thread(cozmo.connect, (run,))
     except KeyboardInterrupt as e:
         pass        
     except cozmo.ConnectionError as e:
         sys.exit("A connection error occurred: %s" % e)
 
     while not coz:
-        time.sleep(0.5)
+        try:
+           time.sleep(0.5)
+        except (KeyboardInterrupt, SystemExit):
+           sys.exit()
 
 def getVideoPort():
     import robot_util
@@ -63,6 +64,11 @@ def run(coz_conn):
             p = Popen(['/usr/local/bin/ffmpeg', '-y', '-f', 'image2pipe', '-vcodec', 'png', '-r', '25', '-i', '-', '-vcodec', 'mpeg1video', '-r', '25', "-f","mpegts","http://letsrobot.tv:"+str(video_port)+"/hello/320/240/"], stdin=PIPE)
         elif platform.startswith('win'):
             #Windows
+            import os
+            if not os.path.isfile('c:/ffmpeg/bin/ffmpeg.exe'):
+               print("Error: cannot find c:\\ffmpeg\\bin\\ffmpeg.exe check ffmpeg is installed. Terminating controller")
+               thread.interrupt_main()
+               thread.exit()
             p = Popen(['c:/ffmpeg/bin/ffmpeg.exe', '-y', '-f', 'image2pipe', '-vcodec', 'png', '-r', '25', '-i', '-', '-vcodec', 'mpeg1video', '-r', '25', "-f","mpegts","http://letsrobot.tv:"+str(video_port)+"/BlahBlah/320/240/"], stdin=PIPE)
         
         try:
