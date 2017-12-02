@@ -2,7 +2,7 @@
 Host Anki Cozmo on LetsRobot.tv
 
 ## Pre-setup
-## install socketIO-client for python3
+### install socketIO-client for python3
 pip3 install socketIO-client
 
 ## Setup instructions:
