@@ -11,6 +11,7 @@ coz = None
 is_headlight_on = False
 forward_speed = 75
 turn_speed = 50
+volume = 100
 
 default_anims_for_keys = ["anim_bored_01",  # 0 drat
                           "id_poked_giggle",  # 1 giggle
@@ -42,7 +43,7 @@ def set_forward_speed(command, args):
         if len(command) > 1:
             try:
                 forward_speed=int(command[1])
-                print("forward_speed set to : %d" % int(command[1]))
+                print("forward_speed set to : %d" % forward_speed)
             except ValueError:
                 pass
 
@@ -52,7 +53,19 @@ def set_turn_speed(command, args):
         if len(command) > 1:
             try:
                 turn_speed=int(command[1])
-                print("turn_speed set to : %d" % int(command[1]))
+                print("turn_speed set to : %d" % turn_speed)
+            except ValueError:
+                pass
+
+def set_volume(command, args):
+    global volume
+    if extended_command.is_authed(args['name']) == 2: # Owner
+        if len(command) > 1:
+            try:
+                tmp=int(command[1])
+                volume=(tmp % 101)
+                coz.set_robot_volume(volume/100)
+                print("volume set to : %d" % volume)
             except ValueError:
                 pass
 
@@ -66,11 +79,16 @@ def setup(robot_config):
     if robot_config.has_section('cozmo'):
         forward_speed = robot_config.getint('cozmo', 'forward_speed');
         turn_speed = robot_config.getint('cozmo', 'turn_speed');
+        volume = robot_config.getint('cozmo', 'volume');
 
     if robot_config.getboolean('tts', 'ext_chat'): #ext_chat enabled, add motor commands
         extended_command.add_command('.anim', play_anim)
         extended_command.add_command('.forward_speed', set_forward_speed)
         extended_command.add_command('.turn_speed', set_turn_speed)
+        extended_command.add_command('.vol', set_volume)
+
+    coz.set_robot_volume(volume/100) # set volume
+
 
 def light_cubes(robot: cozmo.robot.Robot):
     cube1 = robot.world.get_light_cube(LightCube1Id)  # looks like a paperclip
