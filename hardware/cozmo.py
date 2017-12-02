@@ -25,12 +25,17 @@ default_anims_for_keys = ["anim_bored_01",  # 0 drat
                          ]  
 
 def play_anim(command, args):
-    try:
-        if len(command) > 1:
+    if len(command) > 1:
+        try:
             coz.play_anim(command[1]).wait_for_completed()
-    except:
-        pass
-
+        except ValueError:
+            try:
+                coz.play_anim_trigger( getattr(cozmo.anim.Triggers, command[1]) ).wait_for_completed()
+            except:           
+                pass
+        except:
+            pass
+            
 def set_forward_speed(command, args):
     global forward_speed
     if extended_command.is_authed(args['name']) == 2: # Owner
