@@ -24,8 +24,8 @@ Copy the files from this repo to the appropriate directories:
 Edit runmyrobot/letsrobot.sample.conf:
 
 * Enter your owner, robot_id, camera_id from LetsRobot.tv
-* change [robot] type=none to type=cozmo
-* change [tts] type=none to type=cozmo_tts
+* change [robot] `type=none` to `type=cozmo`
+* change [tts] `type=none` to `type=cozmo_tts`
 * Save file as letsrobot.conf
 
 ## Extra Mac setup instructions:
