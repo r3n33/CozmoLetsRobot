@@ -1,6 +1,7 @@
 import time
 import cozmo
 #import _thread as thread
+import threading
 from threading import Thread
 
 coz = None
@@ -20,6 +21,7 @@ def setup(robot_config):
     
     try:
         thread = Thread(target = cozmo.connect, args = (run, )).start()
+        thread.setDaemon(True)
     except KeyboardInterrupt as e:
         pass        
     except cozmo.ConnectionError as e:
