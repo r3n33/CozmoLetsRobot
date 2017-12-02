@@ -36,6 +36,7 @@ brew install ffmpeg
 
 * Using the Cozmo app enter SDK mode and connect your mobile device to the host machine.
 * Execute the LetsRobot controller using `python3 controller.py`
+* For audio streaming execute python send_video.py YOURCAMERAID 0 --no-camera &
 
 ## Update the Let's Robot robot configuration to have these custom controls:
 ```
@@ -192,5 +193,7 @@ brew install ffmpeg
 ## Note for audio streaming on MacOS:
 
 The `startAudioCaptureLinux` function in send_video.py calls ffmpeg with alsa input. If you want to stream audio from your mac use `-f avfoundation -i ":0"` in place of `-f alsa -ar 44100 -ac %d -i hw:%d`
+
+Remove the first two arguments in the parentheses since you're removing two %d's
 
 I also recommend changing the audio streaming bitrate from 32k to 128k with `-b:a 128k` in the same ffmpeg call.
