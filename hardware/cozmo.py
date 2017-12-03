@@ -159,7 +159,7 @@ def check_battery( robot: cozmo.robot.Robot ):
     batt = robot.battery_voltage
     print( "COZMO BATTERY: " + str(batt) )
     if ( batt < 3.5 ):
-        robot.try_say_text("battery low")
+        robot.say_text("battery low")
         
 def move(args):
     global coz
