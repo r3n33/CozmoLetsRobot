@@ -6,12 +6,16 @@ from cozmo.util import degrees, distance_mm, speed_mmps
 from cozmo.objects import LightCube1Id, LightCube2Id, LightCube3Id
 import tts.tts as tts
 import extended_command
+import networking
 
 coz = None
 is_headlight_on = False
 forward_speed = 75
 turn_speed = 50
 volume = 100
+charging = 0
+charge_low = 3.5
+charge_high = 4.5
 
 default_anims_for_keys = ["anim_bored_01",  # 0 drat
                           "id_poked_giggle",  # 1 giggle
@@ -69,26 +73,44 @@ def set_volume(command, args):
             except ValueError:
                 pass
 
+def set_charging(command, args):
+    global charging
+    if extended_command.is_authed(args['name']) == 2: # Owner
+        if len(command) > 1:
+            try:
+                if command[1] == "on" and coz.is_on_charger:
+                    charging = 1
+                elif command[1] == "off":
+                    charging = 0
+                print("charging set to : %d" % charging)
+                networking.sendChargeState(charging)
+            except ValueError:
+                pass
+
 def setup(robot_config):
     global forward_speed
     global turn_speed
     global coz
     global volume
+    global charge_high
+    global charge_low
     
     coz = tts.tts_module.getCozmo()
-    mod_utils.task(30, check_battery, coz)
+    mod_utils.repeat_task(30, check_battery, coz)
 
     if robot_config.has_section('cozmo'):
-        forward_speed = robot_config.getint('cozmo', 'forward_speed');
-        turn_speed = robot_config.getint('cozmo', 'turn_speed');
-        volume = robot_config.getint('cozmo', 'volume');
+        forward_speed = robot_config.getint('cozmo', 'forward_speed')
+        turn_speed = robot_config.getint('cozmo', 'turn_speed')
+        volume = robot_config.getint('cozmo', 'volume')
+        charge_high = robot_config.getfloat('cozmo', 'charge_high')
+        charge_low = robot_config.getfloat('cozmo', 'charge_low')
 
     if robot_config.getboolean('tts', 'ext_chat'): #ext_chat enabled, add motor commands
         extended_command.add_command('.anim', play_anim)
         extended_command.add_command('.forward_speed', set_forward_speed)
         extended_command.add_command('.turn_speed', set_turn_speed)
         extended_command.add_command('.vol', set_volume)
-
+        extended_command.add_command('.charge', set_charging)
     coz.set_robot_volume(volume/100) # set volume
 
 
@@ -156,20 +178,35 @@ def sing_song(robot: cozmo.robot.Robot):
         print(voice_pitch)
 
 def check_battery( robot: cozmo.robot.Robot ):
+    global charging
+
     batt = robot.battery_voltage
-    print( "COZMO BATTERY: " + str(batt) )
-    if ( batt < 3.5 ):
-        robot.say_text("battery low")
+    if not charging:
+        print( "COZMO BATTERY: " + str(batt) )
+        if ( batt < charge_low ):
+            robot.say_text("battery low")
+            print("batt : %f " % batt);
+            print("low : %f " % charge_low);
+    else:
+        if batt > charge_high:
+            charging = 0;
+            robot.say_text("finished charging")
+    networking.sendChargeState(charging)
         
 def move(args):
+    global charging
     global coz
     global is_headlight_on
     command = args['command']
 
     try:
       
-        if coz.is_on_charger:
-            coz.drive_off_charger_contacts().wait_for_completed()
+        if coz.is_on_charger and not charging:
+            if coz.battery_voltage < charge_low:
+                print("Started Charging")
+                charging = 1
+            else:
+                coz.drive_off_charger_contacts().wait_for_completed()
 
         if command == 'F':
             #causes delays #coz.drive_straight(distance_mm(10), speed_mmps(50), False, True).wait_for_completed()
