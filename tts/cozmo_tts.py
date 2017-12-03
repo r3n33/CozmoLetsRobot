@@ -69,7 +69,7 @@ def run(coz_conn):
                print("Error: cannot find c:\\ffmpeg\\bin\\ffmpeg.exe check ffmpeg is installed. Terminating controller")
                thread.interrupt_main()
                thread.exit()
-            p = Popen(['c:/ffmpeg/bin/ffmpeg.exe', '-y', '-f', 'image2pipe', '-vcodec', 'png', '-r', '25', '-i', '-', '-vcodec', 'mpeg1video', '-r', '25', "-f","mpegts","http://letsrobot.tv:"+str(video_port)+"/BlahBlah/320/240/"], stdin=PIPE)
+            p = Popen(['c:/ffmpeg/bin/ffmpeg.exe', '-y', '-f', 'image2pipe', '-vcodec', 'png', '-r', '25', '-i', '-', '-vcodec', 'mpeg1video', '-r', '25', "-f","mpegts","http://letsrobot.tv:"+str(video_port)+"/hello/320/240/"], stdin=PIPE)
         
         try:
             while True:
