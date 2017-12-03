@@ -35,7 +35,7 @@ def getVideoPort():
     import robot_util
     import json
     url = 'https://%s/get_video_port/%s' % (infoServer, camera_id)
-    response = robot_util.getWithRetry(url)
+    response = robot_util.getWithRetry(url).decode('utf-8')
     return(json.loads(response)['mpeg_stream_port'])
 
 def getCozmo():
