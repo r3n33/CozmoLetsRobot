@@ -2,6 +2,8 @@ import time
 import cozmo
 import _thread as thread
 import sys
+import networking
+import schedule
 
 coz = None
 video_port = ""
@@ -31,12 +33,28 @@ def setup(robot_config):
         except (KeyboardInterrupt, SystemExit):
            sys.exit()
 
+    if robot_config.has_section('cozmo'):
+        send_online_status = robot_config.getint('cozmo', 'send_online_status')
+    else:
+        send_online_status = True
+    
+    if send_online_status:
+        print("Enabling online status")
+        schedule.repeat_task(10, updateServer);
+
 def getVideoPort():
     import robot_util
     import json
     url = 'https://%s/get_video_port/%s' % (infoServer, camera_id)
     response = robot_util.getWithRetry(url).decode('utf-8')
     return(json.loads(response)['mpeg_stream_port'])
+
+# Tell the server we are online
+def updateServer():
+    print("Updating Server")
+    networking.appServerSocketIO.emit('send_video_status', {'send_video_process_exists': True,
+                           'ffmpeg_process_exists': True,
+                           'camera_id':camera_id})
 
 def getCozmo():
     return coz

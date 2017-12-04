@@ -16,6 +16,7 @@ volume = 100
 charging = 0
 charge_low = 3.5
 charge_high = 4.5
+low_battery = 0
 
 default_anims_for_keys = ["anim_bored_01",  # 0 drat
                           "id_poked_giggle",  # 1 giggle
@@ -75,12 +76,16 @@ def set_volume(command, args):
 
 def set_charging(command, args):
     global charging
+    global low_battery
     if extended_command.is_authed(args['name']) == 2: # Owner
         if len(command) > 1:
-            try:
-                if command[1] == "on" and coz.is_on_charger:
-                    charging = 1
+            try: 
+                if command[1] == "on":
+                    low_battery = 1
+                    if coz.is_on_charger:
+                        charging = 1
                 elif command[1] == "off":
+                    low_battery = 0
                     charging = 0
                 print("charging set to : %d" % charging)
                 networking.sendChargeState(charging)
@@ -179,17 +184,18 @@ def sing_song(robot: cozmo.robot.Robot):
 
 def check_battery( robot: cozmo.robot.Robot ):
     global charging
+    global low_battery
 
     batt = robot.battery_voltage
+    print( "COZMO BATTERY: " + str(batt) )
     if not charging:
-        print( "COZMO BATTERY: " + str(batt) )
         if ( batt < charge_low ):
             robot.say_text("battery low")
-            print("batt : %f " % batt);
-            print("low : %f " % charge_low);
+            low_battery= 1
     else:
         if batt > charge_high:
-            charging = 0;
+            low_battery = 0
+            charging = 0
             robot.say_text("finished charging")
     networking.sendChargeState(charging)
         
@@ -197,12 +203,12 @@ def move(args):
     global charging
     global coz
     global is_headlight_on
+    global low_battery
     command = args['command']
 
     try:
-      
         if coz.is_on_charger and not charging:
-            if coz.battery_voltage < charge_low:
+            if low_battery:
                 print("Started Charging")
                 charging = 1
             else:
