@@ -17,6 +17,7 @@ charging = 0
 charge_low = 3.5
 charge_high = 4.5
 low_battery = 0
+stay_on_dock = 0
 
 default_anims_for_keys = ["anim_bored_01",  # 0 drat
                           "id_poked_giggle",  # 1 giggle
@@ -92,6 +93,19 @@ def set_charging(command, args):
             except ValueError:
                 pass
 
+def set_stay_on_dock(command, args):
+    global stay_on_dock
+    if extended_command.is_authed(args['name']) == 2: # Owner
+        if len(command) > 1:
+            try: 
+                if command[1] == "on":
+                    stay_on_dock = 1
+                elif command[1] == "off":
+                    stay_on_dock = 0
+                print("stay_on_dock set to : %d" % stay_on_dock)
+            except ValueError:
+                pass
+
 def setup(robot_config):
     global forward_speed
     global turn_speed
@@ -99,6 +113,7 @@ def setup(robot_config):
     global volume
     global charge_high
     global charge_low
+    global stay_on_dock
     
     coz = tts.tts_module.getCozmo()
     mod_utils.repeat_task(30, check_battery, coz)
@@ -109,6 +124,7 @@ def setup(robot_config):
         volume = robot_config.getint('cozmo', 'volume')
         charge_high = robot_config.getfloat('cozmo', 'charge_high')
         charge_low = robot_config.getfloat('cozmo', 'charge_low')
+        stay_on_dock = robot_config.getfloat('cozmo', 'stay_on_dock')
 
     if robot_config.getboolean('tts', 'ext_chat'): #ext_chat enabled, add motor commands
         extended_command.add_command('.anim', play_anim)
@@ -116,6 +132,8 @@ def setup(robot_config):
         extended_command.add_command('.turn_speed', set_turn_speed)
         extended_command.add_command('.vol', set_volume)
         extended_command.add_command('.charge', set_charging)
+        extended_command.add_command('.stay', set_stay_on_dock)
+
     coz.set_robot_volume(volume/100) # set volume
 
 
@@ -212,7 +230,8 @@ def move(args):
                 print("Started Charging")
                 charging = 1
             else:
-                coz.drive_off_charger_contacts().wait_for_completed()
+                if not stay_on_dock:
+                    coz.drive_off_charger_contacts().wait_for_completed()
 
         if command == 'F':
             #causes delays #coz.drive_straight(distance_mm(10), speed_mmps(50), False, True).wait_for_completed()
