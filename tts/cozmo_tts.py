@@ -4,11 +4,26 @@ import _thread as thread
 import sys
 import networking
 import schedule
+import extended_command
 
 coz = None
 video_port = ""
 camera_id = 0
 infoServer = None
+annotated = 0
+colour = False
+
+def set_colour(command, args):
+    global colour 
+    if extended_command.is_authed(args['name']) == 2:
+        colour = not colour
+        coz.camera.color_image_enabled = colour
+
+
+def set_annotated(command, args):
+    global annotated
+    if extended_command.is_authed(args['name']) == 2:
+        annotated = not annotated
 
 def setup(robot_config):
     global camera_id
@@ -20,6 +35,10 @@ def setup(robot_config):
     cozmo.setup_basic_logging()
     cozmo.robot.Robot.drive_off_charger_on_connect = False
     
+    extended_command.add_command('.annotate', set_annotated)
+    extended_command.add_command('.color', set_colour)
+    extended_command.add_command('.colour', set_colour)
+
     try:
         thread.start_new_thread(cozmo.connect, (run,))
     except KeyboardInterrupt as e:
@@ -94,7 +113,10 @@ def run(coz_conn):
                 if coz:
                     image = coz.world.latest_image
                     if image:
-                        image = image.raw_image
+                        if annotated:
+                            image = image.annotate_image()
+                        else:
+                            image = image.raw_image
                         image.save(p.stdin, 'PNG')
                 else:
                     time.sleep(.1)
