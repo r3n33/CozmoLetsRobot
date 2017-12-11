@@ -39,6 +39,7 @@ brew install ffmpeg
 * For audio streaming execute python send_video.py YOURCAMERAID 0 --no-camera &
 
 ## Update the Let's Robot robot configuration to have these custom controls:
+Please see [Customizing Your UI](https://letsrobot.readme.io/docs/customizing-your-ui) for more help
 ```
 [  
    {  
