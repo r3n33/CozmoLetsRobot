@@ -193,8 +193,8 @@ Please see [Customizing Your UI](https://letsrobot.readme.io/docs/customizing-yo
 
 ## Note for audio streaming on MacOS:
 
-The `startAudioCaptureLinux` function in send_video.py calls ffmpeg with alsa input. If you want to stream audio from your mac use `-f avfoundation -i ":0"` in place of `-f alsa -ar 44100 -ac %d -i hw:%d`
+The `startAudioCaptureLinux` function in send_video.py calls ffmpeg with alsa input. If you want to stream audio from your mac use `-f avfoundation -i ":0"` in place of `-f alsa -ar 44100 -ac %d -i hw:%d`.
 
-Remove the first two arguments in the parentheses since you're removing two %d's
+For example:
 
-I also recommend changing the audio streaming bitrate from 32k to 128k with `-b:a 128k` in the same ffmpeg call.
+`audioCommandLine = '/usr/local/bin/ffmpeg -f avfoundation -i ":0" -f mpegts -codec:a mp2 -b:a 128k -muxdelay 0.001 http://%s:%s/%s/640/480/' % (audioHost, audioPort, robotSettings.stream_key)`
